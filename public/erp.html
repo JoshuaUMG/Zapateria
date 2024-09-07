@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP - Zapatería</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Apartado de navegación izquierda -->
+        <aside class="sidebar">
+            <img src="images/logo.jpeg" alt="Logo" class="logo">
+            <nav class="nav">
+                <button class="nav-button" data-page="vendedores.html">Control de Vendedores</button>
+                <button class="nav-button" data-page="ventas.html">Control de Ventas</button>
+                <button class="nav-button" data-page="compras.html">Control de Compras</button>
+                <button class="nav-button" data-page="inventario.html">Inventario</button>
+                <button class="nav-button" data-page="productos.html">Control de Productos</button>
+                <button class="nav-button" data-page="clientes.html">Clientes</button>
+            </nav>
+        </aside>
+
+        <!-- Área principal de contenido -->
+        <main id="content" class="content">
+            <h1>Bienvenido al sistema ERP</h1>
+            <p>Seleccione una opción en el menú izquierdo para comenzar.</p>
+        </main>
+    </div>
+
+    <script>
+        document.querySelectorAll('.nav-button').forEach(button => {
+            button.addEventListener('click', function () {
+                const page = this.getAttribute('data-page');
+                window.open(page, '_blank');
+            });
+        });
+    </script>
+</body>
+</html>

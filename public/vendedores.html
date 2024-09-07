@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendedores</title>
+    <link rel="stylesheet" href="css/vendedores.css">
+</head>
+<body>
+    <h1>Lista de Vendedores</h1>
+    
+    <!-- Campo de búsqueda -->
+    <input type="text" id="search-input" placeholder="Buscar vendedores..." style="margin-bottom: 10px; padding: 5px; width: 100%; max-width: 400px;">
+    
+    <!-- Formulario para agregar un nuevo vendedor -->
+    <h2>Agregar Nuevo Vendedor</h2>
+    <form id="add-vendedor-form">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required>
+        <label for="dpi">DPI:</label>
+        <input type="text" id="dpi" name="dpi" required>
+        <label for="edad">Edad:</label>
+        <input type="number" id="edad" name="edad" required>
+        <label for="telefono">Teléfono:</label>
+        <input type="text" id="telefono" name="telefono" required>
+        <label for="direccion">Dirección:</label>
+        <input type="text" id="direccion" name="direccion" required>
+        <label for="tienda_asignada">Tienda Asignada:</label>
+        <input type="text" id="tienda_asignada" name="tienda_asignada" required>
+        <button type="submit">Agregar Vendedor</button>
+    </form>
+
+    <!-- Formulario para editar un vendedor -->
+    <h2>Editar Vendedor</h2>
+    <form id="edit-vendedor-form" style="display: none;">
+        <input type="hidden" id="edit-id">
+        <label for="edit-nombre">Nombre:</label>
+        <input type="text" id="edit-nombre" name="nombre" required>
+        <label for="edit-dpi">DPI:</label>
+        <input type="text" id="edit-dpi" name="dpi" required>
+        <label for="edit-edad">Edad:</label>
+        <input type="number" id="edit-edad" name="edad" required>
+        <label for="edit-telefono">Teléfono:</label>
+        <input type="text" id="edit-telefono" name="telefono" required>
+        <label for="edit-direccion">Dirección:</label>
+        <input type="text" id="edit-direccion" name="direccion" required>
+        <label for="edit-tienda_asignada">Tienda Asignada:</label>
+        <input type="text" id="edit-tienda_asignada" name="tienda_asignada" required>
+        <button type="submit">Actualizar Vendedor</button>
+    </form>
+
+    <h2>Lista de Vendedores</h2>
+    <table id="vendedores-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>DPI</th>
+                <th>Edad</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Tienda Asignada</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los datos se cargarán aquí -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar la lista de vendedores
+            function loadVendedores() {
+                fetch('/api/vendedores')
+                    .then(response => response.json())
+                    .then(data => {
+                        const tableBody = document.querySelector('#vendedores-table tbody');
+                        tableBody.innerHTML = '';
+                        data.forEach(vendedor => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${vendedor.id_vendedores}</td>
+                                <td><a href="#" class="edit-link" data-id="${vendedor.id_vendedores}">${vendedor.nombre}</a></td>
+                                <td>${vendedor.dpi}</td>
+                                <td>${vendedor.edad}</td>
+                                <td>${vendedor.telefono}</td>
+                                <td>${vendedor.direccion}</td>
+                                <td>${vendedor.tienda_asignada}</td>
+                                <td>
+                                    <button class="delete-btn" data-id="${vendedor.id_vendedores}">Eliminar</button>
+                                </td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+
+                        // Agregar eventos para los enlaces de edición
+                        document.querySelectorAll('.edit-link').forEach(link => {
+                            link.addEventListener('click', function (event) {
+                                event.preventDefault();
+                                const id = this.getAttribute('data-id');
+                                loadVendedorForEdit(id);
+                            });
+                        });
+
+                        // Agregar eventos para los botones de eliminación
+                        document.querySelectorAll('.delete-btn').forEach(button => {
+                            button.addEventListener('click', function () {
+                                const id = this.getAttribute('data-id');
+                                if (confirm('¿Estás seguro de que quieres eliminar este vendedor?')) {
+                                    deleteVendedor(id);
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => console.error('Error al cargar los datos:', error));
+            }
+
+            // Cargar un vendedor específico para edición
+            function loadVendedorForEdit(id) {
+                fetch(`/api/vendedores/${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('edit-id').value = data.id_vendedores;
+                        document.getElementById('edit-nombre').value = data.nombre;
+                        document.getElementById('edit-dpi').value = data.dpi;
+                        document.getElementById('edit-edad').value = data.edad;
+                        document.getElementById('edit-telefono').value = data.telefono;
+                        document.getElementById('edit-direccion').value = data.direccion;
+                        document.getElementById('edit-tienda_asignada').value = data.tienda_asignada;
+                        document.getElementById('edit-vendedor-form').style.display = 'block';
+                    })
+                    .catch(error => console.error('Error al cargar el vendedor:', error));
+            }
+
+            // Manejar el formulario de agregar vendedor
+            document.getElementById('add-vendedor-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = {
+                    nombre: formData.get('nombre'),
+                    dpi: formData.get('dpi'),
+                    edad: formData.get('edad'),
+                    telefono: formData.get('telefono'),
+                    direccion: formData.get('direccion'),
+                    tienda_asignada: formData.get('tienda_asignada')
+                };
+
+                fetch('/api/vendedores', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Vendedor agregado exitosamente');
+                        // Volver a cargar la tabla de vendedores
+                        loadVendedores();
+                    } else {
+                        alert('Error al agregar el vendedor');
+                    }
+                })
+                .catch(error => console.error('Error al agregar el vendedor:', error));
+            });
+
+            // Manejar el formulario de edición de vendedor
+            document.getElementById('edit-vendedor-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const id = document.getElementById('edit-id').value;
+                const formData = new FormData(this);
+                const data = {
+                    nombre: formData.get('nombre'),
+                    dpi: formData.get('dpi'),
+                    edad: formData.get('edad'),
+                    telefono: formData.get('telefono'),
+                    direccion: formData.get('direccion'),
+                    tienda_asignada: formData.get('tienda_asignada')
+                };
+
+                fetch(`/api/vendedores/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Vendedor actualizado exitosamente');
+                        // Volver a cargar la tabla de vendedores
+                        loadVendedores();
+                        document.getElementById('edit-vendedor-form').style.display = 'none';
+                    } else {
+                        alert('Error al actualizar el vendedor');
+                    }
+                })
+                .catch(error => console.error('Error al actualizar el vendedor:', error));
+            });
+
+            // Manejar la eliminación de un vendedor
+            function deleteVendedor(id) {
+                fetch(`/api/vendedores/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Vendedor eliminado exitosamente');
+                        // Volver a cargar la tabla de vendedores
+                        loadVendedores();
+                    } else {
+                        alert('Error al eliminar el vendedor');
+                    }
+                })
+                .catch(error => console.error('Error al eliminar el vendedor:', error));
+            }
+
+            // Manejar la búsqueda en la tabla
+            document.getElementById('search-input').addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#vendedores-table tbody tr');
+
+                rows.forEach(row => {
+                    const cells = row.getElementsByTagName('td');
+                    let found = false;
+                    for (let i = 0; i < cells.length - 1; i++) { // -1 para omitir la columna de acciones
+                        if (cells[i].textContent.toLowerCase().includes(query)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    row.style.display = found ? '' : 'none';
+                });
+            });
+
+            // Inicializar la carga de vendedores
+            loadVendedores();
+        });
+    </script>
+</body>
+</html>
