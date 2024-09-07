@@ -3,6 +3,7 @@ const fastifyStatic = require('@fastify/static');
 const fastifyCors = require('@fastify/cors');
 const path = require('path');
 const mysql = require('mysql2');
+require('dotenv').config(); // Cargar variables de entorno desde el archivo .env
 
 // Crear instancia de Fastify
 const fastify = Fastify();
@@ -16,12 +17,12 @@ fastify.register(fastifyStatic, {
     prefix: '/', // Rutas accesibles desde el root
 });
 
-// Configurar la conexión a la base de datos
+// Configurar la conexión a la base de datos usando variables de entorno
 const connection = mysql.createConnection({
-    host: 'bp7c1qkgysowdr1vvw8x-mysql.services.clever-cloud.com',
-    user: 'umoorekkhbl7oudd',
-    password: 'xelOVMnW7eI5ndrpRZ1k',
-    database: 'bp7c1qkgysowdr1vvw8x'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
 });
 
 // Conectar a la base de datos
@@ -55,8 +56,8 @@ fastify.post('/login', async (request, reply) => {
     });
 });
 
-// Iniciar el servidor de Fastify
-const PORT = 3001;
+// Iniciar el servidor de Fastify usando una variable de entorno para el puerto
+const PORT = process.env.PORT || 3001;
 fastify.listen(PORT, (err, address) => {
     if (err) {
         console.error('Error al iniciar Fastify:', err);
